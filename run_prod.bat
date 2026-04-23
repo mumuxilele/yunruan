@@ -1,0 +1,13 @@
+@echo off
+chcp 65001 >nul
+echo ====================================
+echo   云软通话记录服务启动中 (生产模式)...
+echo ====================================
+cd /d "%~dp0"
+echo 激活虚拟环境...
+call venv\Scripts\activate.bat
+echo 安装依赖...
+pip install -r requirements.txt
+echo 启动Gunicorn服务 (端口5000)...
+gunicorn -w 2 -b 0.0.0.0:5000 app:app --timeout 120
+pause
