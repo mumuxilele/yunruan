@@ -22,6 +22,26 @@ logger = logging.getLogger(__name__)
 YUNRUAN_HOST = os.environ.get('YUNRUAN_HOST', 'u.im-cc.com')
 YUNRUAN_API_URL = f"https://{YUNRUAN_HOST}/ucc-phone/v1/pub/phone/getPath"
 
+# 测试模式（设置 MOCK_MODE=true 启用）
+MOCK_MODE = os.environ.get('MOCK_MODE', 'false').lower() == 'true'
+
+# 模拟数据
+MOCK_RESPONSE = {
+    "code": "0",
+    "reason": "",
+    "detail": [
+        {
+            "path": "https://recording.example.com/2026/04/23/abc123.mp3",
+            "phoneNumber": "13800138000",
+            "sessionId": "200337",
+            "duration": 180,
+            "caller": "13800138000",
+            "callee": "13900139000",
+            "callTime": "2026-04-23 10:30:00"
+        }
+    ]
+}
+
 
 @app.route('/ucc-phone/v1/pub/phone/getPath', methods=['POST'])
 def get_phone_path():
@@ -36,6 +56,15 @@ def get_phone_path():
         失败: {"code": "非0", "reason": "原因"}
     """
     try:
+        # 测试模式 - 返回模拟数据
+        if MOCK_MODE:
+            mock_result = MOCK_RESPONSE.copy()
+            # 用请求的sessionId替换mock数据
+            if 'detail' in mock_result and mock_result['detail']:
+                mock_result['detail'][0]['sessionId'] = session_id
+            logger.info(f"测试模式，返回模拟数据: {mock_result}")
+            return jsonify(mock_result)
+        
         # 获取请求参数
         data = request.get_json()
         if not data:
